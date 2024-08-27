@@ -5,16 +5,12 @@ import gsap from "gsap";
 import { Sky } from "three/addons/objects/Sky.js";
 import fireworkVertexShader from "./shaders/firework/vertex.glsl";
 import fireworkFragmentShader from "./shaders/firework/fragment.glsl";
-import {
-  FontLoader,
-  TextGeometry,
-  Wireframe,
-} from "three/examples/jsm/Addons.js";
+
 /**
  * Base
  */
 // Debug
-// const gui = new GUI({ width: 340 });
+const gui = new GUI({ width: 340 });
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -37,50 +33,6 @@ sizes.resolution = new THREE.Vector2(
   sizes.width * sizes.pixelRatio,
   sizes.height * sizes.pixelRatio
 );
-
-const matcapTexture1 = textureLoader.load("/textures/matcaps/1.png");
-const matcapTexture2 = textureLoader.load("/textures/matcaps/8.png");
-
-// FontLoader
-const fontLoader = new FontLoader();
-fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
-  const textGeometry = new TextGeometry("Thank You", {
-    font: font,
-    size: 0.5,
-    height: 0.2,
-    curveSegments: 8,
-    bevelEnabled: true,
-    bevelThickness: 0.03,
-    bevelSize: 0.02,
-    bevelOffset: 0,
-    bevelSegments: 5,
-  });
-
-  const textMaterial = new THREE.MeshMatcapMaterial({
-    matcap: matcapTexture2,
-  });
-
-  const text = new THREE.Mesh(textGeometry, textMaterial);
-  textGeometry.center();
-  scene.add(text);
-});
-
-// Torus Geometry
-const donutGeometry = new THREE.TorusGeometry(0.1, 0.05, 20, 45);
-const donutMaterial = new THREE.MeshMatcapMaterial({
-  matcap: matcapTexture1,
-});
-for (let i = 0; i < 100; i++) {
-  const donut = new THREE.Mesh(donutGeometry, donutMaterial);
-  donut.position.x = (Math.random() - 0.5) * 10;
-  donut.position.y = (Math.random() - 0.5) * 10;
-  donut.position.z = (Math.random() - 0.5) * 10;
-  donut.rotation.x = Math.random() * Math.PI;
-  donut.rotation.y = Math.random() * Math.PI;
-  const scale = Math.random();
-  donut.scale.set(scale, scale, scale);
-  scene.add(donut);
-}
 
 window.addEventListener("resize", () => {
   // Update sizes
@@ -111,7 +63,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.set(10, 3, 10);
+camera.position.set(1.5, 0, 6);
 scene.add(camera);
 
 // Controls
@@ -276,40 +228,22 @@ const updateSky = () => {
   renderer.render(scene, camera);
 };
 
-// gui.add(skyParameters, "turbidity", 0.0, 20.0, 0.1).onChange(updateSky);
-// gui.add(skyParameters, "rayleigh", 0.0, 4, 0.001).onChange(updateSky);
-// gui.add(skyParameters, "mieCoefficient", 0.0, 0.1, 0.001).onChange(updateSky);
-// gui.add(skyParameters, "mieDirectionalG", 0.0, 1, 0.001).onChange(updateSky);
-// gui.add(skyParameters, "elevation", -3, 10, 0.01).onChange(updateSky);
-// gui.add(skyParameters, "azimuth", -180, 180, 0.1).onChange(updateSky);
-// gui.add(skyParameters, "exposure", 0, 1, 0.0001).onChange(updateSky);
+gui.add(skyParameters, "turbidity", 0.0, 20.0, 0.1).onChange(updateSky);
+gui.add(skyParameters, "rayleigh", 0.0, 4, 0.001).onChange(updateSky);
+gui.add(skyParameters, "mieCoefficient", 0.0, 0.1, 0.001).onChange(updateSky);
+gui.add(skyParameters, "mieDirectionalG", 0.0, 1, 0.001).onChange(updateSky);
+gui.add(skyParameters, "elevation", -3, 10, 0.01).onChange(updateSky);
+gui.add(skyParameters, "azimuth", -180, 180, 0.1).onChange(updateSky);
+gui.add(skyParameters, "exposure", 0, 1, 0.0001).onChange(updateSky);
 
 updateSky();
 
 /**
  * Animate
  */
-const clock = new THREE.Clock();
-let fireworkInterval = 0;
-
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
-
-  // Rotate camera around the origin
-  const radius = 15; // Radius of the circular path
-  const speed = 0.3; // Rotation speed
-  camera.position.x = Math.cos(elapsedTime * speed) * radius;
-  camera.position.z = Math.sin(elapsedTime * speed) * radius;
-  camera.lookAt(0, 0, 0); // Always look at the center
-
   // Update controls
   controls.update();
-
-  // Fireworks: Two per second
-  if (elapsedTime - fireworkInterval > 1.2) {
-    createRandomFirework();
-    fireworkInterval = elapsedTime;
-  }
 
   // Render
   renderer.render(scene, camera);
