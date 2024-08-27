@@ -116,7 +116,7 @@ const tick = () => {
 
   // Camera animation
   const radius = 5; // Distance from the center (text)
-  const speed = 0.5; // Rotation speed
+  const speed = 0.3; // Rotation speed
 
   // Calculate new camera position
   camera.position.x = radius * Math.cos(elapsedTime * speed);
