@@ -1,12 +1,11 @@
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import GUI from "lil-gui";
-
 import {
   FontLoader,
   TextGeometry,
   Wireframe,
 } from "three/examples/jsm/Addons.js";
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import GUI from "lil-gui";
 
 // Debug
 const gui = new GUI();
@@ -17,14 +16,15 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-//Textures
+// Textures
 const textureLoader = new THREE.TextureLoader();
 const matcapTexture1 = textureLoader.load("/textures/matcaps/1.png");
 const matcapTexture2 = textureLoader.load("/textures/matcaps/8.png");
-//fontLoaders
+
+// FontLoader
 const fontLoader = new FontLoader();
 fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
-  const textGeometry = new TextGeometry("Hello World", {
+  const textGeometry = new TextGeometry("Thank You", {
     font: font,
     size: 0.5,
     height: 0.2,
@@ -35,22 +35,18 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
     bevelOffset: 0,
     bevelSegments: 5,
   });
+
   const textMaterial = new THREE.MeshMatcapMaterial({
     matcap: matcapTexture2,
   });
+
   const text = new THREE.Mesh(textGeometry, textMaterial);
-  textGeometry.computeBoundingBox();
-  textGeometry.translate(
-    -(textGeometry.boundingBox.max.x - 0.02) * 0.5,
-    -(textGeometry.boundingBox.max.y - 0.02) * 0.5,
-    -(textGeometry.boundingBox.max.z - 0.03) * 0.5
-  );
   textGeometry.center();
   scene.add(text);
-
-  console.log(textGeometry.boundingBox);
 });
-const donutGeometry = new THREE.TorusGeometry(0.2, 0.1, 20, 45);
+
+// Torus Geometry
+const donutGeometry = new THREE.TorusGeometry(0.1, 0.05, 20, 45);
 const donutMaterial = new THREE.MeshMatcapMaterial({
   matcap: matcapTexture1,
 });
@@ -62,28 +58,11 @@ for (let i = 0; i < 100; i++) {
   donut.rotation.x = Math.random() * Math.PI;
   donut.rotation.y = Math.random() * Math.PI;
   const scale = Math.random();
-  donut.scale.x = scale;
-  donut.scale.y = scale;
-  donut.scale.z = scale;
-
+  donut.scale.set(scale, scale, scale);
   scene.add(donut);
 }
 
-//axes helper
-// const axesHelper = new THREE.AxesHelper();
-// scene.add(axesHelper);
-
-//Object
-
-// const cube = new THREE.Mesh(
-//   new THREE.BoxGeometry(1, 1, 1),
-//   new THREE.MeshBasicMaterial()
-// );
-
-// scene.add(cube);
-
 // Sizes
-
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
@@ -103,19 +82,14 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-/**
- * Camera
- */
-// Base camera
+// Camera
 const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
   100
 );
-camera.position.x = 1;
-camera.position.y = 1;
-camera.position.z = 2;
+camera.position.set(1, 1, 5); // Initial camera position
 scene.add(camera);
 
 // Controls
@@ -127,6 +101,7 @@ controls.enableDamping = true;
  */
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
+  alpha: true,
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -138,6 +113,17 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  // Camera animation
+  const radius = 5; // Distance from the center (text)
+  const speed = 0.5; // Rotation speed
+
+  // Calculate new camera position
+  camera.position.x = radius * Math.cos(elapsedTime * speed);
+  camera.position.z = radius * Math.sin(elapsedTime * speed);
+
+  // Keep the camera looking at the origin (where the text is located)
+  camera.lookAt(0, 0, 0);
 
   // Update controls
   controls.update();
